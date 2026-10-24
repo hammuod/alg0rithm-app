@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Alg0rithm
+GenericName=Algorithm Learning
+Comment=Learn algorithms – simple, fast, offline-ready
+Comment[ar]=تعلم الخوارزميات – بسيط وسريع ويدعم العمل بدون إنترنت
+Exec=alg0rithm
+Icon=alg0rithm
+Terminal=false
+Categories=Education;Development;
+StartupNotify=true
+Keywords=algorithm;learn;code;programming;

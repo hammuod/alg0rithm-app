@@ -1,0 +1,32 @@
+# Flatpak manifest – Alg0rithm
+# Preferred universal Linux packaging (free, sandboxed, works on every distro)
+# Build later with: flatpak-builder --user --install build-dir packaging/flatpak/dev.alg0rithm.Alg0rithm.yml
+
+app-id: dev.alg0rithm.Alg0rithm
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: alg0rithm
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+modules:
+  - name: alg0rithm
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 alg0rithm /app/bin/alg0rithm
+      - install -Dm644 alg0rithm.desktop /app/share/applications/dev.alg0rithm.Alg0rithm.desktop
+      - install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/dev.alg0rithm.Alg0rithm.png
+    sources:
+      - type: file
+        path: ../../scripts/flatpak-launcher.sh
+        dest-filename: alg0rithm
+      - type: file
+        path: ../deb/alg0rithm.desktop
+      - type: file
+        url: https://raw.githubusercontent.com/hammuod/Alg0rithm/main/imgs/icon.png
+        dest-filename: icon.png
+        sha256: "0000000000000000000000000000000000000000000000000000000000000000"  # update when building

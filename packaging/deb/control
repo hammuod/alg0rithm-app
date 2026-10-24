@@ -1,0 +1,11 @@
+Package: alg0rithm
+Version: 3.0.0
+Section: education
+Priority: optional
+Architecture: all
+Maintainer: Hammoud <contact@alg0rithm.dev>
+Depends: xdg-utils
+Description: Alg0rithm – learn algorithms simply
+ Minimalist educational platform for programming logic and algorithms.
+ Offline-capable PWA packaged as a desktop application.
+ Homepage: https://alg0rithm.dev
