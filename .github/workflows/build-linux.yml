@@ -1,4 +1,4 @@
-name: Build ALL Linux packages (free tier)
+name: Build Linux packages
 
 on:
   workflow_dispatch:
@@ -15,52 +15,211 @@ permissions:
   contents: write
 
 jobs:
-  packages:
-    name: Build deb + rpm + arch + alpine + tarball
+  # ─────────────────────────────────────────
+  # 1. Debian / Ubuntu / Mint / Pop / Zorin / ...
+  # ─────────────────────────────────────────
+  deb:
+    name: "DEB (Debian family)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install RPM tools
+      - name: Build .deb
+        run: |
+          chmod +x scripts/build-deb.sh
+          ./scripts/build-deb.sh
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-deb
+          path: dist/*
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────
+  # 2. Fedora / RHEL / Rocky / Alma / openSUSE
+  # ─────────────────────────────────────────
+  rpm:
+    name: "RPM (Fedora / RHEL / openSUSE)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install rpmbuild
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq rpm
 
-      - name: Build everything
+      - name: Build .rpm
         run: |
-          chmod +x scripts/*.sh
-          ./scripts/build-all-linux.sh
+          chmod +x scripts/build-rpm.sh
+          ./scripts/build-rpm.sh
 
-      - name: List outputs
-        run: ls -lh dist/
-
-      - name: Upload all artifacts
+      - name: Upload RPM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: alg0rithm-linux-all
-          path: dist/
+          name: package-rpm
+          path: dist/*
+          if-no-files-found: error
 
-      - name: Attach to GitHub Release (on tag)
-        if: startsWith(github.ref, 'refs/tags/')
+  # ─────────────────────────────────────────
+  # 3. Arch / Manjaro / Endeavour / Garuda
+  # ─────────────────────────────────────────
+  arch:
+    name: "Arch (PKGBUILD)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Arch source package
+        run: |
+          chmod +x scripts/build-arch.sh
+          ./scripts/build-arch.sh
+
+      - name: Upload Arch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-arch
+          path: dist/*
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────
+  # 4. Alpine
+  # ─────────────────────────────────────────
+  alpine:
+    name: "Alpine (APKBUILD)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Alpine source package
+        run: |
+          chmod +x scripts/build-alpine.sh
+          ./scripts/build-alpine.sh
+
+      - name: Upload Alpine artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-alpine
+          path: dist/*
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────
+  # 5. Universal tarball (any distro)
+  # ─────────────────────────────────────────
+  tarball:
+    name: "Tarball (any Linux)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build universal tarball
+        run: |
+          chmod +x scripts/build-tarball.sh
+          ./scripts/build-tarball.sh
+
+      - name: Upload tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-tarball
+          path: dist/*
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────
+  # 6. AppImage prep
+  # ─────────────────────────────────────────
+  appimage:
+    name: "AppImage (portable)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build AppDir / AppImage prep
+        run: |
+          chmod +x scripts/build-appimage.sh
+          ./scripts/build-appimage.sh
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-appimage
+          path: dist/*
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────
+  # Release: collect all packages on tag only
+  # ─────────────────────────────────────────
+  release:
+    name: "Publish Release"
+    needs: [deb, rpm, arch, alpine, tarball, appimage]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download DEB
+        uses: actions/download-artifact@v4
+        with:
+          name: package-deb
+          path: release/
+
+      - name: Download RPM
+        uses: actions/download-artifact@v4
+        with:
+          name: package-rpm
+          path: release/
+
+      - name: Download Arch
+        uses: actions/download-artifact@v4
+        with:
+          name: package-arch
+          path: release/
+
+      - name: Download Alpine
+        uses: actions/download-artifact@v4
+        with:
+          name: package-alpine
+          path: release/
+
+      - name: Download Tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: package-tarball
+          path: release/
+
+      - name: Download AppImage
+        uses: actions/download-artifact@v4
+        with:
+          name: package-appimage
+          path: release/
+
+      - name: List release files
+        run: find release -type f | sort
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: release/**
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # ─────────────────────────────────────────
+  # Summary (always runs after builds)
+  # ─────────────────────────────────────────
   summary:
-    name: Coverage summary
-    needs: [packages]
+    name: "Summary"
+    needs: [deb, rpm, arch, alpine, tarball, appimage]
     runs-on: ubuntu-latest
+    if: always()
     steps:
-      - name: Distros covered
+      - name: Coverage
         run: |
-          echo "✅ Debian / Ubuntu / Mint / Pop / Zorin / Elementary / MX / Deepin → .deb"
-          echo "✅ Fedora / RHEL / Rocky / Alma / CentOS → .rpm"
-          echo "✅ openSUSE / SLES → .rpm + zypper"
-          echo "✅ Arch / Manjaro / Endeavour / Garuda → PKGBUILD src"
-          echo "✅ Alpine → APKBUILD src"
-          echo "✅ Any other (Void, Gentoo, ...) → universal tarball + install.sh"
-          echo "✅ Flatpak path ready in packaging/flatpak/"
-          echo "All built on free ubuntu-latest runners."
+          echo "| Job      | Target distros                          |"
+          echo "|----------|-----------------------------------------|"
+          echo "| deb      | Debian Ubuntu Mint Pop Zorin Elementary |"
+          echo "| rpm      | Fedora RHEL Rocky Alma openSUSE         |"
+          echo "| arch     | Arch Manjaro Endeavour Garuda           |"
+          echo "| alpine   | Alpine Linux                             |"
+          echo "| tarball  | Void Gentoo Slackware any other         |"
+          echo "| appimage | Portable (all)                           |"
+          echo ""
+          echo "Jobs run in parallel on free ubuntu-latest runners."
