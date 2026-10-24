@@ -1,4 +1,4 @@
-name: Build Linux packages (free tier)
+name: Build ALL Linux packages (free tier)
 
 on:
   workflow_dispatch:
@@ -15,54 +15,52 @@ permissions:
   contents: write
 
 jobs:
-  deb:
-    name: Build .deb
-    runs-on: ubuntu-latest   # free
+  packages:
+    name: Build deb + rpm + arch + alpine + tarball
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build DEB
+      - name: Install RPM tools
         run: |
-          chmod +x scripts/build-deb.sh
-          ./scripts/build-deb.sh
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq rpm
 
-      - name: Upload artifact
+      - name: Build everything
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/build-all-linux.sh
+
+      - name: List outputs
+        run: ls -lh dist/
+
+      - name: Upload all artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: alg0rithm-deb
-          path: dist/*.deb*
+          name: alg0rithm-linux-all
+          path: dist/
 
-      - name: Attach to release (on tag)
+      - name: Attach to GitHub Release (on tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  appimage-prep:
-    name: Prepare AppImage dir
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build AppDir
-        run: |
-          chmod +x scripts/build-appimage.sh
-          ./scripts/build-appimage.sh
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: alg0rithm-appimage-dir
-          path: dist/*.tar.gz
-
   summary:
-    name: Summary
-    needs: [deb, appimage-prep]
+    name: Coverage summary
+    needs: [packages]
     runs-on: ubuntu-latest
     steps:
-      - name: Done
+      - name: Distros covered
         run: |
-          echo "Linux packages built successfully on free runners."
-          echo "Next: Windows, then macOS, then Android."
+          echo "✅ Debian / Ubuntu / Mint / Pop / Zorin / Elementary / MX / Deepin → .deb"
+          echo "✅ Fedora / RHEL / Rocky / Alma / CentOS → .rpm"
+          echo "✅ openSUSE / SLES → .rpm + zypper"
+          echo "✅ Arch / Manjaro / Endeavour / Garuda → PKGBUILD src"
+          echo "✅ Alpine → APKBUILD src"
+          echo "✅ Any other (Void, Gentoo, ...) → universal tarball + install.sh"
+          echo "✅ Flatpak path ready in packaging/flatpak/"
+          echo "All built on free ubuntu-latest runners."

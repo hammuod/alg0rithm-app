@@ -1,39 +1,29 @@
 # Alg0rithm App
 
-> Native application packaging for [Alg0rithm](https://github.com/hammuod/Alg0rithm)  
-> **Free plan only** — everything builds on GitHub Actions free tier.
+> Native packaging for [Alg0rithm](https://github.com/hammuod/Alg0rithm)  
+> **Free plan only** — GitHub Actions free runners.
 
-**Order of work:** Linux → Windows → macOS → Android
+**Order:** Linux (all distros) → Windows → macOS → Android
 
 ---
 
 ## العربية
 
-تطبيق Alg0rithm الأصلي.
+حزم Alg0rithm لكل توزيعات لينكس.
 
-- المشروع الأساسي (`Alg0rithm`) يبقى موقع ويب + PWA فقط.
-- هذا الريبو مخصص للتطبيقات والحزم.
-- نبدأ بلينكس (كل التوزيعات + Flatpak + AppImage + deb).
-- كل شيء مجاني ويعمل على GitHub Actions بدون أي تكلفة.
-
-### تثبيت سريع (لينكس)
+### تثبيت سريع
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.sh | bash
 ```
 
+السكربت يكتشف توزيعتك تلقائياً (بما فيها Zorin و Mint و Fedora و Arch و openSUSE و Alpine و Void وغيرها).
+
 ---
 
 ## English
 
-Native Alg0rithm application packages.
-
-- Core project stays pure web/PWA.
-- This repo = native apps & packages.
-- **Linux first** (all distros + Flatpak + AppImage + deb).
-- 100% free — builds on GitHub free runners only.
-
-### Quick install (Linux)
+### Quick install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.sh | bash
@@ -43,14 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.
 
 ## Français
 
-Paquets natifs pour Alg0rithm.
-
-- Le projet principal reste un site + PWA.
-- Ce dépôt = applications natives et paquets.
-- **Linux d'abord** (toutes distributions + Flatpak + AppImage + deb).
-- Entièrement gratuit (GitHub Actions gratuit).
-
-### Installation rapide (Linux)
+### Installation rapide
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.sh | bash
@@ -58,50 +41,47 @@ curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.
 
 ---
 
-## Roadmap (free tier)
+## Linux packages built by CI
 
-| Stage | Platform | Formats | Status |
-|-------|----------|---------|--------|
-| 1 | **Linux** | install.sh, .deb, AppImage, Flatpak | In progress |
-| 2 | Windows | portable + installer | Next |
-| 3 | macOS | .dmg / .app | Later |
-| 4 | Android | APK / TWA | Later |
-
----
-
-## Linux support matrix
-
-| Distro family | Package manager | Supported |
-|---------------|-----------------|-----------|
-| Debian / Ubuntu / Mint / Pop | apt + .deb | Yes |
-| Fedora / RHEL / Rocky / Alma | dnf / yum + .rpm | Yes |
-| Arch / Manjaro / Endeavour | pacman | Yes |
-| openSUSE | zypper | Yes |
-| Alpine | apk | Yes |
-| Any | **Flatpak** | Yes (preferred) |
-| Any | **AppImage** | Yes (portable) |
+| Format | Distros |
+|--------|---------|
+| **`.deb`** | Debian, Ubuntu, Linux Mint, Pop!_OS, **Zorin OS**, Elementary, MX, Deepin, Kali, ... |
+| **`.rpm`** | Fedora, RHEL, Rocky, Alma, CentOS, **openSUSE**, SLES |
+| **Arch src** | Arch, Manjaro, EndeavourOS, Garuda, Artix, CachyOS |
+| **Alpine src** | Alpine Linux |
+| **Universal tarball** | Void, Gentoo, Slackware, NixOS (manual), any other |
+| **Flatpak** | All (manifest ready) |
+| **AppImage** | All (portable) |
 
 ---
 
-## Project layout
+## Build locally
 
+```bash
+./scripts/build-all-linux.sh
+# outputs in dist/
 ```
-alg0rithm-app/
-├── install.sh                 # Smart multi-distro installer
-├── packaging/
-│   ├── deb/                   # Debian package files
-│   ├── appimage/              # AppImage recipe
-│   └── flatpak/               # Flatpak manifest
-├── scripts/
-│   └── build-linux.sh         # Local / CI build helper
-├── web/                       # Cached copy of the PWA (optional)
-└── .github/workflows/
-    └── build-linux.yml        # Free Ubuntu runners only
+
+Or individually:
+
+```bash
+./scripts/build-deb.sh
+./scripts/build-rpm.sh
+./scripts/build-arch.sh
+./scripts/build-alpine.sh
+./scripts/build-tarball.sh
 ```
+
+---
+
+## CI
+
+Workflow: **Build ALL Linux packages**  
+Runs on `ubuntu-latest` (free). Trigger manually from Actions or push a tag `v*`.
 
 ---
 
 ## License
 
-AGPL-3.0 — same as the main project.  
+AGPL-3.0 — same as main project.  
 Creator: **Hammoud (hammuod)**

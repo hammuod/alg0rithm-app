@@ -1,0 +1,22 @@
+# Contributor: Hammoud <contact@alg0rithm.dev>
+# Maintainer: Hammoud <contact@alg0rithm.dev>
+pkgname=alg0rithm
+pkgver=3.0.0
+pkgrel=0
+pkgdesc="Learn algorithms – simple, fast, offline-ready"
+url="https://alg0rithm.dev"
+arch="noarch"
+license="AGPL-3.0-or-later"
+depends="xdg-utils"
+options="!check"
+source="alg0rithm alg0rithm.desktop icon.png"
+
+package() {
+  install -Dm755 "$srcdir/alg0rithm" "$pkgdir/usr/bin/alg0rithm"
+  install -Dm644 "$srcdir/alg0rithm.desktop" \
+    "$pkgdir/usr/share/applications/alg0rithm.desktop"
+  if [ -f "$srcdir/icon.png" ]; then
+    install -Dm644 "$srcdir/icon.png" \
+      "$pkgdir/usr/share/icons/hicolor/256x256/apps/alg0rithm.png"
+  fi
+}
