@@ -3,11 +3,8 @@ name: RPM
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
-    paths:
-      - 'scripts/build-rpm.sh'
-      - 'packaging/rpm/**'
-      - '.github/workflows/rpm.yml'
+    tags:
+      - 'build*'
 
 permissions:
   contents: write
@@ -24,13 +21,17 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq rpm
 
-      - name: Build
+      - name: Fetch Alg0rithm web app
+        run: |
+          chmod +x scripts/fetch-web.sh
+          ./scripts/fetch-web.sh
+
+      - name: Build RPM
         run: |
           chmod +x scripts/build-rpm.sh
           ./scripts/build-rpm.sh
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: package-rpm
           path: dist/*

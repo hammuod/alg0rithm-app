@@ -3,10 +3,8 @@ name: Tarball
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
-    paths:
-      - 'scripts/build-tarball.sh'
-      - '.github/workflows/tarball.yml'
+    tags:
+      - 'build*'
 
 permissions:
   contents: write
@@ -18,13 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build
+      - name: Fetch Alg0rithm web app
+        run: |
+          chmod +x scripts/fetch-web.sh
+          ./scripts/fetch-web.sh
+
+      - name: Build tarball
         run: |
           chmod +x scripts/build-tarball.sh
           ./scripts/build-tarball.sh
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: package-tarball
           path: dist/*

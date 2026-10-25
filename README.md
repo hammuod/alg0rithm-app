@@ -1,87 +1,64 @@
 # Alg0rithm App
 
-> Native packaging for [Alg0rithm](https://github.com/hammuod/Alg0rithm)  
-> **Free plan only** — GitHub Actions free runners.
+Native packages for [Alg0rithm](https://github.com/hammuod/Alg0rithm).  
+**Takes code from the main repo → packages it as an app.**
 
-**Order:** Linux (all distros) → Windows → macOS → Android
+Trigger builds with tag: **`build*`** (example: `build`, `build-3.0.0`)
 
 ---
 
-## العربية
+## Workflows (each file is independent)
 
-حزم Alg0rithm لكل توزيعات لينكس.
+| Workflow | File | Runner |
+|----------|------|--------|
+| DEB | `.github/workflows/deb.yml` | ubuntu |
+| RPM | `.github/workflows/rpm.yml` | ubuntu |
+| Arch | `.github/workflows/arch.yml` | ubuntu |
+| Alpine | `.github/workflows/alpine.yml` | ubuntu |
+| Tarball | `.github/workflows/tarball.yml` | ubuntu |
+| AppImage | `.github/workflows/appimage.yml` | ubuntu |
+| **Windows** | `.github/workflows/windows.yml` | windows-latest |
+| **macOS** | `.github/workflows/macos.yml` | macos-latest |
+| **Android** | `.github/workflows/android.yml` | ubuntu |
 
-### تثبيت سريع
+No job waits for another. Run any one alone from **Actions → Run workflow**.
+
+---
+
+## How it works
+
+1. `scripts/fetch-web.sh` clones **hammuod/Alg0rithm** into `web/app`
+2. Platform scripts embed that code into the package
+3. Launcher opens the **local** app (offline), fallback to https://alg0rithm.dev
+
+---
+
+## Tag to build everything
+
+```bash
+git tag build
+git push origin build
+```
+
+Or:
+
+```bash
+git tag build-3.0.0
+git push origin build-3.0.0
+```
+
+Each workflow attaches its files to the same GitHub Release independently.
+
+---
+
+## Quick install (Linux)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.sh | bash
 ```
-
-السكربت يكتشف توزيعتك تلقائياً (بما فيها Zorin و Mint و Fedora و Arch و openSUSE و Alpine و Void وغيرها).
-
----
-
-## English
-
-### Quick install
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.sh | bash
-```
-
----
-
-## Français
-
-### Installation rapide
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/hammuod/alg0rithm-app/main/install.sh | bash
-```
-
----
-
-## Linux packages built by CI
-
-| Format | Distros |
-|--------|---------|
-| **`.deb`** | Debian, Ubuntu, Linux Mint, Pop!_OS, **Zorin OS**, Elementary, MX, Deepin, Kali, ... |
-| **`.rpm`** | Fedora, RHEL, Rocky, Alma, CentOS, **openSUSE**, SLES |
-| **Arch src** | Arch, Manjaro, EndeavourOS, Garuda, Artix, CachyOS |
-| **Alpine src** | Alpine Linux |
-| **Universal tarball** | Void, Gentoo, Slackware, NixOS (manual), any other |
-| **Flatpak** | All (manifest ready) |
-| **AppImage** | All (portable) |
-
----
-
-## Build locally
-
-```bash
-./scripts/build-all-linux.sh
-# outputs in dist/
-```
-
-Or individually:
-
-```bash
-./scripts/build-deb.sh
-./scripts/build-rpm.sh
-./scripts/build-arch.sh
-./scripts/build-alpine.sh
-./scripts/build-tarball.sh
-```
-
----
-
-## CI
-
-Workflow: **Build ALL Linux packages**  
-Runs on `ubuntu-latest` (free). Trigger manually from Actions or push a tag `v*`.
 
 ---
 
 ## License
 
-AGPL-3.0 — same as main project.  
-Creator: **Hammoud (hammuod)**
+AGPL-3.0 — Hammoud (hammuod)

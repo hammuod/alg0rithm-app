@@ -3,11 +3,8 @@ name: AppImage
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
-    paths:
-      - 'scripts/build-appimage.sh'
-      - 'packaging/appimage/**'
-      - '.github/workflows/appimage.yml'
+    tags:
+      - 'build*'
 
 permissions:
   contents: write
@@ -19,13 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build
+      - name: Fetch Alg0rithm web app
+        run: |
+          chmod +x scripts/fetch-web.sh
+          ./scripts/fetch-web.sh
+
+      - name: Build AppImage
         run: |
           chmod +x scripts/build-appimage.sh
           ./scripts/build-appimage.sh
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: package-appimage
           path: dist/*
