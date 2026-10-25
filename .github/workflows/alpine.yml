@@ -1,0 +1,39 @@
+name: Alpine
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+    paths:
+      - 'scripts/build-alpine.sh'
+      - 'packaging/alpine/**'
+      - '.github/workflows/alpine.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Alpine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          chmod +x scripts/build-alpine.sh
+          ./scripts/build-alpine.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-alpine
+          path: dist/*
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

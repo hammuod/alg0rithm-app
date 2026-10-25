@@ -1,0 +1,38 @@
+name: Tarball
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+    paths:
+      - 'scripts/build-tarball.sh'
+      - '.github/workflows/tarball.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Tarball
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          chmod +x scripts/build-tarball.sh
+          ./scripts/build-tarball.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-tarball
+          path: dist/*
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
